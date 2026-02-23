@@ -12,6 +12,7 @@ name = "gnunet_social"
 path = "src/lib.rs"
 
 [dependencies]
+gnunet-sys = { path = "gnunet-sys" }
 tokio = { version = "1", features = ["full"] }
 tokio-tungstenite = "0.26"
 serde = { version = "1", features = ["derive"] }
@@ -27,6 +28,7 @@ futures = "0.3"
 bytes = "1"
 parking_lot = "0.12"
 dashmap = "6"
+libc = "0.2"
 
 [profile.release]
 opt-level = 3

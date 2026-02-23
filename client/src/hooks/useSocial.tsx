@@ -24,12 +24,8 @@ interface SocialContextValue {
 
 const SocialContext = createContext<SocialContextValue | null>(null);
 
-function getOrCreatePeerId(): string {
-  const stored = localStorage.getItem('gnunet_peer_id');
-  if (stored) return stored;
-  const id = crypto.randomUUID();
-  localStorage.setItem('gnunet_peer_id', id);
-  return id;
+function getPeerId(): string | null {
+  return localStorage.getItem('gnunet_peer_id');
 }
 
 function handleEvent(
@@ -59,12 +55,12 @@ function handleEvent(
 }
 
 export function SocialProvider({ children }: { children: ReactNode }) {
-  const peerIdRef = useRef<string>(getOrCreatePeerId());
+  const peerIdRef = useRef<string>(getPeerId());
   const wsUrl = useMemo(
     () => `ws://${window.location.hostname}:8080/ws/${peerIdRef.current}`,
     []
   );
-  
+
   const { connected, send, subscribe } = useWebSocket(wsUrl);
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -74,7 +70,7 @@ export function SocialProvider({ children }: { children: ReactNode }) {
   const [privateMessages, setPrivateMessages] = useState<PrivateMessage[]>([]);
   const [friends, setFriends] = useState<string[]>([]);
   const currentRoomRef = useRef(currentRoom);
-  
+
   useEffect(() => {
     currentRoomRef.current = currentRoom;
   }, [currentRoom]);
@@ -127,6 +123,7 @@ export function SocialProvider({ children }: { children: ReactNode }) {
   }, [subscribe, send]);
 
   const login = useCallback((peerId: string) => {
+    localStorage.setItem('gnunet_peer_id', peerId);
     send({ type: 'auth', peer_id: peerId });
   }, [send]);
 

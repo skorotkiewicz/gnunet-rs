@@ -1,0 +1,19 @@
+[package]
+name = "gnunet-sys"
+version = "0.1.0"
+edition = "2024"
+links = "gnunetutil"
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]
+bindgen = "0.71"
+
+[features]
+default = ["util", "cadet", "identity", "gns", "arm"]
+util = []
+cadet = []
+identity = []
+gns = []
+arm = []

@@ -11,7 +11,7 @@ export function useWebSocket(url: string) {
   const mountedRef = useRef(false);
 
   const connect = useCallback(() => {
-    if (wsRef.current?.readyState === WebSocket.CONNECTING || 
+    if (wsRef.current?.readyState === WebSocket.CONNECTING ||
         wsRef.current?.readyState === WebSocket.OPEN) {
       return;
     }
