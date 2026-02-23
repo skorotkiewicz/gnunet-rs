@@ -51,7 +51,7 @@ export function Profile() {
             <span className="profile-username">@{profileUser.username}</span>
           )}
           {profileUser.bio && <p className="profile-bio">{profileUser.bio}</p>}
-          
+
           <div className="profile-id">
             <code>{profileUser.id}</code>
             <button type="button" onClick={handleCopyId} title="Copy ID">

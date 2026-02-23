@@ -77,7 +77,6 @@ pub struct GetPostRequest {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LikePostRequest {
     pub post_id: Uuid,
-    pub unlike: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

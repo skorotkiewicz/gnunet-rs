@@ -71,7 +71,7 @@ export type ClientMessage =
   | { type: 'create_post'; content: string; media_hashes: string[]; reply_to?: string; repost_of?: string; visibility: string }
   | { type: 'get_feed'; peer_id: string; limit?: number; before?: string }
   | { type: 'get_post'; post_id: string }
-  | { type: 'like_post'; post_id: string; unlike: boolean }
+  | { type: 'like_post'; post_id: string; unlike?: boolean }
   | { type: 'create_room'; name: string; description?: string; is_group: boolean; is_public: boolean }
   | { type: 'get_rooms' }
   | { type: 'join_room'; room_id: string }

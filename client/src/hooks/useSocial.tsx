@@ -119,6 +119,19 @@ export function SocialProvider({ children }: { children: ReactNode }) {
         case 'feed':
           setPosts(msg.posts);
           break;
+        case 'post':
+          if (msg.post) {
+            setPosts(prev => {
+              const idx = prev.findIndex(p => p.id === msg.post!.id);
+              if (idx >= 0) {
+                const updated = [...prev];
+                updated[idx] = msg.post!;
+                return updated;
+              }
+              return [msg.post!, ...prev];
+            });
+          }
+          break;
         case 'room':
           if (msg.rooms) {
             setRooms(msg.rooms);
@@ -171,7 +184,7 @@ export function SocialProvider({ children }: { children: ReactNode }) {
   }, [send]);
 
   const likePost = useCallback((postId: string) => {
-    send({ type: 'like_post', post_id: postId, unlike: false });
+    send({ type: 'like_post', post_id: postId });
   }, [send]);
 
   const createRoom = useCallback((name: string, isGroup: boolean, isPublic: boolean) => {
