@@ -142,13 +142,27 @@ impl MessageHandler {
         ServerMessage::Post(PostResponse { post })
     }
 
-    fn handle_like_post(&self, _req: LikePostRequest) -> ServerMessage {
+    fn handle_like_post(&self, req: LikePostRequest) -> ServerMessage {
         let _peer = match self.current_peer() {
             Some(p) => p,
             None => return ServerMessage::Error(ErrorResponse::new(401, "Not authenticated")),
         };
 
-        ServerMessage::Error(ErrorResponse::new(501, "Not implemented"))
+        let mut posts = self.store.posts.write();
+        if let Some(post) = posts.get_mut(&req.post_id) {
+            if req.unlike {
+                post.likes = post.likes.saturating_sub(1);
+            } else {
+                post.likes += 1;
+            }
+            let updated = post.clone();
+            drop(posts);
+            ServerMessage::Post(PostResponse {
+                post: Some(updated),
+            })
+        } else {
+            ServerMessage::Error(ErrorResponse::new(404, "Post not found"))
+        }
     }
 
     fn handle_create_room(&self, req: CreateRoomRequest) -> ServerMessage {

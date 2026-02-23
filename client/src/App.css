@@ -570,6 +570,120 @@ body {
   color: var(--fg-muted);
 }
 
+.room-item-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.room-item-wrapper .room-item {
+  flex: 1;
+}
+
+.btn-room-info {
+  padding: 4px 6px;
+  border: none;
+  background: transparent;
+  color: var(--fg-muted);
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.room-item-wrapper:hover .btn-room-info {
+  opacity: 1;
+}
+
+.btn-room-info:hover {
+  color: var(--accent);
+}
+
+.my-info {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.my-info h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-muted);
+  margin-bottom: 8px;
+}
+
+.peer-id-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-tertiary);
+  padding: 8px;
+  border-radius: var(--radius);
+}
+
+.peer-id-box code {
+  flex: 1;
+  font-size: 10px;
+  color: var(--fg-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.peer-id-box button {
+  padding: 4px 8px;
+  border: none;
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.room-info-field {
+  margin-bottom: 12px;
+}
+
+.room-info-field label {
+  display: block;
+  font-size: 11px;
+  color: var(--fg-muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.room-info-field code {
+  font-size: 12px;
+  color: var(--accent);
+}
+
+.copy-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-tertiary);
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.copy-field code {
+  flex: 1;
+  font-size: 11px;
+  word-break: break-all;
+}
+
+.copy-field button {
+  padding: 4px 8px;
+  border: none;
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
 @media (max-width: 900px) {
   .app-layout {
     grid-template-columns: 1fr;
