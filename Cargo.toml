@@ -1,0 +1,33 @@
+[package]
+name = "gnunet-social"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "gnunet-social-server"
+path = "src/main.rs"
+
+[lib]
+name = "gnunet_social"
+path = "src/lib.rs"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+tokio-tungstenite = "0.26"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+async-trait = "0.1"
+futures = "0.3"
+bytes = "1"
+parking_lot = "0.12"
+dashmap = "6"
+
+[profile.release]
+opt-level = 3
+lto = true
