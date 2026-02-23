@@ -1,2 +1,2 @@
 export { useWebSocket } from './useWebSocket';
-export { SocialProvider, useSocial } from './useSocial';
+export { SocialProvider, useSocial, type SocialContextValue } from './useSocial';

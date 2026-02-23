@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSocial } from '../hooks';
 
 export function Feed() {
-  const { posts, createPost, connected } = useSocial();
+  const { posts, createPost, connected, likePost, requestFriend, peerId } = useSocial();
   const [content, setContent] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -36,14 +36,30 @@ export function Feed() {
           <article key={post.id} className="post">
             <header className="post-header">
               <span className="post-author">@{post.author_id.slice(0, 8)}</span>
+              {post.author_id !== peerId && (
+                <button
+                  type="button"
+                  className="btn-add-friend"
+                  onClick={() => requestFriend(post.author_id)}
+                  title="Add friend"
+                >
+                  +
+                </button>
+              )}
               <time className="post-time">
                 {new Date(post.created_at).toLocaleTimeString()}
               </time>
             </header>
             <p className="post-content">{post.content}</p>
             <footer className="post-footer">
-              <span>{post.likes} likes</span>
-              <span>{post.reposts} reposts</span>
+              <button
+                type="button"
+                className="btn-like"
+                onClick={() => likePost(post.id)}
+              >
+                ♥ {post.likes}
+              </button>
+              <span>↻ {post.reposts}</span>
             </footer>
           </article>
         ))}

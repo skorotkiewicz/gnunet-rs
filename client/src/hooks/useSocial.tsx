@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef, ty
 import { useWebSocket } from './useWebSocket';
 import type { User, Post, ChatRoom, ChatMessage, PrivateMessage, ClientMessage, ServerMessage, EventMessage } from '../types';
 
-interface SocialContextValue {
+export interface SocialContextValue {
   connected: boolean;
   authenticated: boolean;
   peerId: string | null;
@@ -16,11 +16,14 @@ interface SocialContextValue {
   send: (msg: ClientMessage) => boolean;
   login: (peerId: string) => void;
   createPost: (content: string) => void;
+  likePost: (postId: string) => void;
+  createRoom: (name: string, isGroup: boolean, isPublic: boolean) => void;
   joinRoom: (roomId: string) => void;
   sendMessage: (roomId: string, content: string) => void;
   sendPrivateMessage: (recipientId: string, content: string) => void;
   setCurrentRoom: (room: ChatRoom | null) => void;
   requestFriend: (peerId: string) => void;
+  acceptFriend: (peerId: string) => void;
   getFeed: () => void;
 }
 
@@ -53,7 +56,10 @@ function handleEvent(
       setPrivateMessages(prev => [...prev, event.message]);
       break;
     case 'friend_request':
-      setFriends(prev => [...prev, event.from]);
+      setFriends(prev => prev.includes(event.from) ? prev : [...prev, event.from]);
+      break;
+    case 'friend_accepted':
+      setFriends(prev => prev.includes(event.peer_id) ? prev : [...prev, event.peer_id]);
       break;
   }
 }
@@ -145,6 +151,19 @@ export function SocialProvider({ children }: { children: ReactNode }) {
     });
   }, [send]);
 
+  const likePost = useCallback((postId: string) => {
+    send({ type: 'like_post', post_id: postId, unlike: false });
+  }, [send]);
+
+  const createRoom = useCallback((name: string, isGroup: boolean, isPublic: boolean) => {
+    send({
+      type: 'create_room',
+      name,
+      is_group: isGroup,
+      is_public: isPublic,
+    });
+  }, [send]);
+
   const joinRoom = useCallback((roomId: string) => {
     send({ type: 'join_room', room_id: roomId });
   }, [send]);
@@ -171,6 +190,10 @@ export function SocialProvider({ children }: { children: ReactNode }) {
     send({ type: 'request_friend', peer_id: friendPeerId });
   }, [send]);
 
+  const acceptFriend = useCallback((friendPeerId: string) => {
+    send({ type: 'accept_friend', peer_id: friendPeerId });
+  }, [send]);
+
   const getFeed = useCallback(() => {
     if (peerId) {
       send({ type: 'get_feed', peer_id: peerId });
@@ -193,11 +216,14 @@ export function SocialProvider({ children }: { children: ReactNode }) {
         send,
         login,
         createPost,
+        likePost,
+        createRoom,
         joinRoom,
         sendMessage,
         sendPrivateMessage,
         setCurrentRoom,
         requestFriend,
+        acceptFriend,
         getFeed,
       }}
     >
