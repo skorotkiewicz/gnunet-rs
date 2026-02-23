@@ -1,7 +1,7 @@
 pub mod gnunet;
-pub mod social;
 pub mod mqtt;
 pub mod protocol;
+pub mod social;
 
-pub use social::*;
 pub use protocol::messages::*;
+pub use social::*;

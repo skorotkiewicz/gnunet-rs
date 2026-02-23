@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { useWebSocket } from './useWebSocket';
 import type { User, Post, ChatRoom, ChatMessage, PrivateMessage, ClientMessage, ServerMessage, EventMessage } from '../types';
 
@@ -24,8 +24,10 @@ interface SocialContextValue {
 
 const SocialContext = createContext<SocialContextValue | null>(null);
 
+const PEER_ID_KEY = 'gnunet_peer_id';
+
 function getPeerId(): string | null {
-  return localStorage.getItem('gnunet_peer_id');
+  return localStorage.getItem(PEER_ID_KEY);
 }
 
 function handleEvent(
@@ -55,11 +57,8 @@ function handleEvent(
 }
 
 export function SocialProvider({ children }: { children: ReactNode }) {
-  const peerIdRef = useRef<string>(getPeerId());
-  const wsUrl = useMemo(
-    () => `ws://${window.location.hostname}:8080/ws/${peerIdRef.current}`,
-    []
-  );
+  const [peerId] = useState(getPeerId);
+  const wsUrl = `ws://${window.location.hostname}:8080/ws/${peerId}`;
 
   const { connected, send, subscribe } = useWebSocket(wsUrl);
   const [user, setUser] = useState<User | null>(null);
@@ -122,9 +121,9 @@ export function SocialProvider({ children }: { children: ReactNode }) {
     return unsubscribe;
   }, [subscribe, send]);
 
-  const login = useCallback((peerId: string) => {
-    localStorage.setItem('gnunet_peer_id', peerId);
-    send({ type: 'auth', peer_id: peerId });
+  const login = useCallback((newPeerId: string) => {
+    localStorage.setItem(PEER_ID_KEY, newPeerId);
+    send({ type: 'auth', peer_id: newPeerId });
   }, [send]);
 
   const createPost = useCallback((content: string) => {
@@ -158,8 +157,8 @@ export function SocialProvider({ children }: { children: ReactNode }) {
     });
   }, [send]);
 
-  const requestFriend = useCallback((peerId: string) => {
-    send({ type: 'request_friend', peer_id: peerId });
+  const requestFriend = useCallback((friendPeerId: string) => {
+    send({ type: 'request_friend', peer_id: friendPeerId });
   }, [send]);
 
   const getFeed = useCallback(() => {

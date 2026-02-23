@@ -7,27 +7,42 @@ export function useWebSocket(url: string) {
   const wsRef = useRef<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
   const handlersRef = useRef<Set<MessageHandler>>(new Set());
-  const reconnectTimeoutRef = useRef<number | null>(null);
-  const mountedRef = useRef(false);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const urlRef = useRef(url);
+
+  useEffect(() => {
+    urlRef.current = url;
+  }, [url]);
+
+  const cleanup = useCallback(() => {
+    if (reconnectTimeoutRef.current) {
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
+    }
+    if (wsRef.current) {
+      wsRef.current.onclose = null;
+      wsRef.current.onerror = null;
+      wsRef.current.onopen = null;
+      wsRef.current.onmessage = null;
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+  }, []);
 
   const connect = useCallback(() => {
-    if (wsRef.current?.readyState === WebSocket.CONNECTING ||
-        wsRef.current?.readyState === WebSocket.OPEN) {
-      return;
-    }
-
-    const ws = new WebSocket(url);
+    cleanup();
+    
+    const ws = new WebSocket(urlRef.current);
 
     ws.onopen = () => {
-      if (mountedRef.current) {
-        setConnected(true);
-      }
+      setConnected(true);
     };
 
-    ws.onclose = () => {
-      if (mountedRef.current) {
-        setConnected(false);
-        reconnectTimeoutRef.current = window.setTimeout(connect, 3000);
+    ws.onclose = (event) => {
+      setConnected(false);
+      wsRef.current = null;
+      if (event.code !== 1000) {
+        reconnectTimeoutRef.current = setTimeout(connect, 2000);
       }
     };
 
@@ -45,16 +60,7 @@ export function useWebSocket(url: string) {
     };
 
     wsRef.current = ws;
-  }, [url]);
-
-  const disconnect = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-    wsRef.current?.close();
-    wsRef.current = null;
-  }, []);
+  }, [cleanup]);
 
   const send = useCallback((msg: ClientMessage) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -70,13 +76,9 @@ export function useWebSocket(url: string) {
   }, []);
 
   useEffect(() => {
-    mountedRef.current = true;
     connect();
-    return () => {
-      mountedRef.current = false;
-      disconnect();
-    };
-  }, [connect, disconnect]);
+    return cleanup;
+  }, [connect, cleanup]);
 
-  return { connected, send, subscribe, disconnect };
+  return { connected, send, subscribe };
 }

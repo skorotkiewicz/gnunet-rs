@@ -1,12 +1,22 @@
+import { useState, useEffect } from 'react';
 import { SocialProvider, useSocial } from './hooks';
 import { Feed, Chat, Sidebar, Login } from './components';
 import './App.css';
 
 function AppContent() {
-  const { user, connected } = useSocial();
+  const { connected } = useSocial();
+  const [hasPeerId, setHasPeerId] = useState(() => !!localStorage.getItem('gnunet_peer_id'));
 
-  if (!connected || !user) {
-    return <Login />;
+  useEffect(() => {
+    const checkPeerId = () => {
+      setHasPeerId(!!localStorage.getItem('gnunet_peer_id'));
+    };
+    window.addEventListener('storage', checkPeerId);
+    return () => window.removeEventListener('storage', checkPeerId);
+  }, []);
+
+  if (!connected || !hasPeerId) {
+    return <Login onLogin={() => setHasPeerId(true)} />;
   }
 
   return (

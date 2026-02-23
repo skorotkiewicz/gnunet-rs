@@ -1,7 +1,11 @@
 import { useState } from 'react';
 import { useSocial } from '../hooks';
 
-export function Login() {
+interface LoginProps {
+  onLogin?: () => void;
+}
+
+export function Login({ onLogin }: LoginProps) {
   const { login, connected } = useSocial();
   const [peerId, setPeerId] = useState('');
 
@@ -9,6 +13,7 @@ export function Login() {
     e.preventDefault();
     if (peerId.trim()) {
       login(peerId.trim());
+      onLogin?.();
     }
   };
 

@@ -1,6 +1,6 @@
 use crate::gnunet::PeerIdentity;
 use crate::social::ChatMessage;
-use futures::channel::mpsc::{channel, Receiver, Sender};
+use futures::channel::mpsc::{Receiver, Sender, channel};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 

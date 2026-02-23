@@ -1,6 +1,5 @@
 use serde::{Deserialize, Serialize};
 use std::ffi::{CStr, CString};
-use std::ptr;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct PeerIdentity(String);
