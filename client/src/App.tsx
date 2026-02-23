@@ -1,5 +1,5 @@
 import { SocialProvider, useSocial } from './hooks';
-import { Feed, Chat, Sidebar, Login } from './components';
+import { Feed, Chat, Sidebar, Login, Profile } from './components';
 import './App.css';
 
 function AppContent() {
@@ -10,15 +10,18 @@ function AppContent() {
   }
 
   return (
-    <div className="app-layout">
-      <Sidebar />
-      <main className="main-content">
-        <Feed />
-      </main>
-      <aside className="chat-panel">
-        <Chat />
-      </aside>
-    </div>
+    <>
+      <div className="app-layout">
+        <Sidebar />
+        <main className="main-content">
+          <Feed />
+        </main>
+        <aside className="chat-panel">
+          <Chat />
+        </aside>
+      </div>
+      <Profile />
+    </>
   );
 }
 

@@ -1,3 +1,4 @@
+import { Plus, ArrowUpRight, Info, Mail, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useSocial } from '../hooks';
 
@@ -51,8 +52,8 @@ export function Sidebar() {
         <div className="section-header">
           <h3>Rooms</h3>
           <div className="section-actions">
-            <button type="button" onClick={() => setShowNewRoom(true)} title="Create room">+</button>
-            <button type="button" onClick={() => setShowJoinRoom(true)} title="Join room">↗</button>
+            <button type="button" onClick={() => setShowNewRoom(true)} title="Create room"><Plus size={12} /></button>
+            <button type="button" onClick={() => setShowJoinRoom(true)} title="Join room"><ArrowUpRight size={12} /></button>
           </div>
         </div>
 
@@ -99,7 +100,7 @@ export function Sidebar() {
                 onClick={() => setShowRoomInfo(room.id)}
                 title="Room info"
               >
-                ℹ
+                <Info size={12} />
               </button>
             </div>
           ))}
@@ -121,7 +122,7 @@ export function Sidebar() {
                 onClick={() => setShowMessage(friendId)}
                 title="Send message"
               >
-                ✉
+                <Mail size={12} />
               </button>
             </div>
           ))}
@@ -137,7 +138,7 @@ export function Sidebar() {
             onClick={() => peerId && copyToClipboard(peerId)}
             title="Copy peer ID"
           >
-            {copied ? '✓' : '⎘'}
+            {copied ? <Check size={12} /> : <Copy size={12} />}
           </button>
         </div>
       </section>
@@ -177,7 +178,7 @@ export function Sidebar() {
                     type="button"
                     onClick={() => copyToClipboard(room.id)}
                   >
-                    {copied ? '✓' : '⎘'}
+                    {copied ? <Check size={12} /> : <Copy size={12} />}
                   </button>
                 </div>
               </div>

@@ -9,6 +9,8 @@ export interface User {
   updated_at: string;
 }
 
+export type PostVisibility = 'Public' | 'FollowersOnly' | 'MutualsOnly' | 'Private';
+
 export interface Post {
   id: string;
   author_id: string;
@@ -16,9 +18,9 @@ export interface Post {
   media_hashes: string[];
   reply_to: string | null;
   repost_of: string | null;
-  visibility: 'Public' | 'FollowersOnly' | 'MutualsOnly' | 'Private';
+  visibility: PostVisibility;
   created_at: string;
-  likes: number;
+  likes: string[];
   reposts: number;
 }
 
@@ -71,6 +73,7 @@ export type ClientMessage =
   | { type: 'get_post'; post_id: string }
   | { type: 'like_post'; post_id: string; unlike: boolean }
   | { type: 'create_room'; name: string; description?: string; is_group: boolean; is_public: boolean }
+  | { type: 'get_rooms' }
   | { type: 'join_room'; room_id: string }
   | { type: 'leave_room'; room_id: string }
   | { type: 'send_room_message'; room_id: string; content: string; media_hashes: string[]; reply_to?: string }

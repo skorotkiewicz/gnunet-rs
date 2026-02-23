@@ -20,6 +20,7 @@ pub enum ClientMessage {
     GetPost(GetPostRequest),
     LikePost(LikePostRequest),
     CreateRoom(CreateRoomRequest),
+    GetRooms(GetRoomsRequest),
     JoinRoom(JoinRoomRequest),
     LeaveRoom(LeaveRoomRequest),
     SendRoomMessage(SendRoomMessageRequest),
@@ -86,6 +87,9 @@ pub struct CreateRoomRequest {
     pub is_group: bool,
     pub is_public: bool,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GetRoomsRequest;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct JoinRoomRequest {

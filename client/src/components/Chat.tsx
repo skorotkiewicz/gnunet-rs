@@ -2,10 +2,16 @@ import { useState, useRef, useEffect } from 'react';
 import { useSocial } from '../hooks';
 
 export function Chat() {
-  const { currentRoom, roomMessages, sendMessage } = useSocial();
+  const { currentRoom, roomMessages, sendMessage, getRoomMessages } = useSocial();
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const prevLengthRef = useRef(0);
+
+  useEffect(() => {
+    if (currentRoom) {
+      getRoomMessages(currentRoom.id);
+    }
+  }, [currentRoom?.id, getRoomMessages]);
 
   useEffect(() => {
     if (roomMessages.length !== prevLengthRef.current) {

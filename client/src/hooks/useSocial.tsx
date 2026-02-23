@@ -15,9 +15,10 @@ export interface SocialContextValue {
   friends: string[];
   send: (msg: ClientMessage) => boolean;
   login: (peerId: string) => void;
-  createPost: (content: string) => void;
+  createPost: (content: string, visibility?: string) => void;
   likePost: (postId: string) => void;
   createRoom: (name: string, isGroup: boolean, isPublic: boolean) => void;
+  getRooms: () => void;
   joinRoom: (roomId: string) => void;
   sendMessage: (roomId: string, content: string) => void;
   sendPrivateMessage: (recipientId: string, content: string) => void;
@@ -25,6 +26,13 @@ export interface SocialContextValue {
   requestFriend: (peerId: string) => void;
   acceptFriend: (peerId: string) => void;
   getFeed: () => void;
+  getFriends: () => void;
+  getUser: (peerId: string) => void;
+  getRoomMessages: (roomId: string) => void;
+  users: Map<string, User>;
+  showProfile: (peerId: string) => void;
+  profileUser: User | null;
+  closeProfile: () => void;
 }
 
 const SocialContext = createContext<SocialContextValue | null>(null);
@@ -71,12 +79,14 @@ export function SocialProvider({ children }: { children: ReactNode }) {
   const [authenticated, setAuthenticated] = useState(false);
   const [peerId, setPeerId] = useState<string | null>(getStoredPeerId);
   const [user, setUser] = useState<User | null>(null);
+  const [users, setUsers] = useState<Map<string, User>>(new Map());
   const [posts, setPosts] = useState<Post[]>([]);
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
   const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
   const [roomMessages, setRoomMessages] = useState<ChatMessage[]>([]);
   const [privateMessages, setPrivateMessages] = useState<PrivateMessage[]>([]);
   const [friends, setFriends] = useState<string[]>([]);
+  const [profileUser, setProfileUser] = useState<User | null>(null);
   const currentRoomRef = useRef(currentRoom);
 
   useEffect(() => {
@@ -96,18 +106,27 @@ export function SocialProvider({ children }: { children: ReactNode }) {
           if (msg.success) {
             setAuthenticated(true);
             send({ type: 'get_feed', peer_id: msg.peer_id });
+            send({ type: 'get_rooms' });
+            send({ type: 'get_friends' });
           }
           break;
         case 'user':
-          if (msg.user) setUser(msg.user);
+          if (msg.user) {
+            setUser(msg.user);
+            setUsers(prev => new Map(prev).set(msg.user!.id, msg.user!));
+          }
           break;
         case 'feed':
           setPosts(msg.posts);
           break;
         case 'room':
-          if (msg.room) {
+          if (msg.rooms) {
+            setRooms(msg.rooms);
+          } else if (msg.room) {
             setRooms(prev => {
-              if (prev.find(r => r.id === msg.room!.id)) return prev;
+              if (prev.find(r => r.id === msg.room!.id)) {
+                return prev.map(r => r.id === msg.room!.id ? msg.room! : r);
+              }
               return [...prev, msg.room!];
             });
           }
@@ -142,12 +161,12 @@ export function SocialProvider({ children }: { children: ReactNode }) {
     setPeerId(newPeerId);
   }, []);
 
-  const createPost = useCallback((content: string) => {
+  const createPost = useCallback((content: string, visibility: string = 'Public') => {
     send({
       type: 'create_post',
       content,
       media_hashes: [],
-      visibility: 'Public',
+      visibility,
     });
   }, [send]);
 
@@ -162,6 +181,10 @@ export function SocialProvider({ children }: { children: ReactNode }) {
       is_group: isGroup,
       is_public: isPublic,
     });
+  }, [send]);
+
+  const getRooms = useCallback(() => {
+    send({ type: 'get_rooms' });
   }, [send]);
 
   const joinRoom = useCallback((roomId: string) => {
@@ -200,6 +223,38 @@ export function SocialProvider({ children }: { children: ReactNode }) {
     }
   }, [send, peerId]);
 
+  const getFriends = useCallback(() => {
+    send({ type: 'get_friends' });
+  }, [send]);
+
+  const getUser = useCallback((targetPeerId: string) => {
+    send({ type: 'get_user', peer_id: targetPeerId });
+  }, [send]);
+
+  const getRoomMessages = useCallback((roomId: string) => {
+    send({ type: 'get_room_messages', room_id: roomId });
+  }, [send]);
+
+  const showProfile = useCallback((targetPeerId: string) => {
+    send({ type: 'get_user', peer_id: targetPeerId });
+    const existing = users.get(targetPeerId);
+    if (existing) {
+      setProfileUser(existing);
+    } else {
+      setProfileUser({ id: targetPeerId, username: targetPeerId.slice(0, 8), display_name: '', bio: null, avatar_hash: null, gns_zone: '', created_at: '', updated_at: '' });
+    }
+  }, [send, users]);
+
+  const closeProfile = useCallback(() => {
+    setProfileUser(null);
+  }, []);
+
+  useEffect(() => {
+    if (profileUser?.id && users.has(profileUser.id)) {
+      setProfileUser(users.get(profileUser.id)!);
+    }
+  }, [users, profileUser?.id]);
+
   return (
     <SocialContext.Provider
       value={{
@@ -218,6 +273,7 @@ export function SocialProvider({ children }: { children: ReactNode }) {
         createPost,
         likePost,
         createRoom,
+        getRooms,
         joinRoom,
         sendMessage,
         sendPrivateMessage,
@@ -225,6 +281,13 @@ export function SocialProvider({ children }: { children: ReactNode }) {
         requestFriend,
         acceptFriend,
         getFeed,
+        getFriends,
+        getUser,
+        getRoomMessages,
+        users,
+        showProfile,
+        profileUser,
+        closeProfile,
       }}
     >
       {children}

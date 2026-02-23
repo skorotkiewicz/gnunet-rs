@@ -46,7 +46,7 @@ pub struct Post {
     pub repost_of: Option<Uuid>,
     pub visibility: PostVisibility,
     pub created_at: DateTime<Utc>,
-    pub likes: u64,
+    pub likes: Vec<String>,
     pub reposts: u64,
 }
 
@@ -69,7 +69,7 @@ impl Post {
             repost_of: None,
             visibility: PostVisibility::Public,
             created_at: Utc::now(),
-            likes: 0,
+            likes: Vec::new(),
             reposts: 0,
         }
     }

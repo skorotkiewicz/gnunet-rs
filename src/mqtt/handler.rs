@@ -34,6 +34,7 @@ impl MessageHandler {
             ClientMessage::GetPost(req) => self.handle_get_post(req),
             ClientMessage::LikePost(req) => self.handle_like_post(req),
             ClientMessage::CreateRoom(req) => self.handle_create_room(req),
+            ClientMessage::GetRooms(req) => self.handle_get_rooms(req),
             ClientMessage::JoinRoom(req) => self.handle_join_room(req),
             ClientMessage::LeaveRoom(req) => self.handle_leave_room(req),
             ClientMessage::SendRoomMessage(req) => self.handle_send_room_message(req),
@@ -143,17 +144,18 @@ impl MessageHandler {
     }
 
     fn handle_like_post(&self, req: LikePostRequest) -> ServerMessage {
-        let _peer = match self.current_peer() {
+        let peer = match self.current_peer() {
             Some(p) => p,
             None => return ServerMessage::Error(ErrorResponse::new(401, "Not authenticated")),
         };
 
+        let peer_str = peer.to_string();
         let mut posts = self.store.posts.write();
         if let Some(post) = posts.get_mut(&req.post_id) {
-            if req.unlike {
-                post.likes = post.likes.saturating_sub(1);
+            if post.likes.contains(&peer_str) {
+                post.likes.retain(|id| id != &peer_str);
             } else {
-                post.likes += 1;
+                post.likes.push(peer_str);
             }
             let updated = post.clone();
             drop(posts);
@@ -179,6 +181,27 @@ impl MessageHandler {
         ServerMessage::Room(RoomResponse {
             room: Some(room),
             rooms: None,
+        })
+    }
+
+    fn handle_get_rooms(&self, _req: GetRoomsRequest) -> ServerMessage {
+        let peer = match self.current_peer() {
+            Some(p) => p,
+            None => return ServerMessage::Error(ErrorResponse::new(401, "Not authenticated")),
+        };
+
+        let rooms: Vec<ChatRoom> = self
+            .store
+            .rooms
+            .read()
+            .values()
+            .filter(|r| r.members.contains(&peer))
+            .cloned()
+            .collect();
+
+        ServerMessage::Room(RoomResponse {
+            room: None,
+            rooms: Some(rooms),
         })
     }
 
