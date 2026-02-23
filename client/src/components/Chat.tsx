@@ -38,7 +38,7 @@ export function Chat() {
         <h3>{currentRoom.name}</h3>
         <span className="chat-members">{currentRoom.members.length} members</span>
       </header>
-      
+
       <div className="chat-messages">
         {messages.map((msg) => (
           <div key={msg.id} className="chat-message">
@@ -51,7 +51,7 @@ export function Chat() {
         ))}
         <div ref={messagesEndRef} />
       </div>
-      
+
       <form className="chat-input" onSubmit={handleSubmit}>
         <input
           type="text"

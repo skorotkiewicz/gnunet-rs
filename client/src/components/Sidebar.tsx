@@ -21,7 +21,7 @@ export function Sidebar() {
           ))}
         </div>
       </section>
-      
+
       <section className="friends-section">
         <h3>Friends ({friends.length})</h3>
         <div className="friend-list">

@@ -22,7 +22,7 @@ export function Login({ onLogin }: LoginProps) {
       <div className="login-card">
         <h1>GNUnet Social</h1>
         <p className="login-subtitle">Decentralized social networking</p>
-        
+
         {!connected ? (
           <div className="login-connecting">Connecting to network...</div>
         ) : (

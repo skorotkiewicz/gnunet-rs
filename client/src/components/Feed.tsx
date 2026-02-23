@@ -30,7 +30,7 @@ export function Feed() {
           Post
         </button>
       </form>
-      
+
       <div className="posts">
         {posts.map((post) => (
           <article key={post.id} className="post">

@@ -396,7 +396,7 @@ body {
   .app-layout {
     grid-template-columns: 1fr;
   }
-  
+
   .sidebar, .chat-panel {
     display: none;
   }

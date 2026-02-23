@@ -31,7 +31,7 @@ export function useWebSocket(url: string) {
 
   const connect = useCallback(() => {
     cleanup();
-    
+
     const ws = new WebSocket(urlRef.current);
 
     ws.onopen = () => {
