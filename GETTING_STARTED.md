@@ -40,7 +40,7 @@ You should see services like `cadet`, `gns`, `identity`, `dht` listed.
 gnunet-identity -d
 ```
 
-This will show your peer ID (e.g., `SXE8KY6W87Y34BWS06S7VT23MPBQKV6ZA7R3NKV5R4EWA7N5TSNG`). You'll use this to log in.
+This will show your peer ID. You'll use this to log in.
 
 ### 4. Install Build Tools
 
