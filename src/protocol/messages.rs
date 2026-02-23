@@ -165,6 +165,7 @@ pub enum ServerMessage {
     PrivateMessage(PrivateMessageResponse),
     Error(ErrorResponse),
     Event(EventMessage),
+    SearchUsers(SearchUsersResponse),
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -216,6 +217,11 @@ pub struct PrivateMessageResponse {
 pub struct ErrorResponse {
     pub code: u16,
     pub message: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SearchUsersResponse {
+    pub users: Vec<User>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

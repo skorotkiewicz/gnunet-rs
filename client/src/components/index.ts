@@ -1,5 +1,5 @@
-export { Feed } from './Feed';
-export { Chat } from './Chat';
-export { Sidebar } from './Sidebar';
-export { Login } from './Login';
-export { Profile } from './Profile';
+export { Chat } from "./Chat";
+export { Feed } from "./Feed";
+export { Login } from "./Login";
+export { Profile } from "./Profile";
+export { Sidebar } from "./Sidebar";

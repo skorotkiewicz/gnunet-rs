@@ -48,7 +48,7 @@ impl GnsService {
     }
 
     pub fn store_record(&mut self, name: &str, zone: &PublicKey, record: GnsRecord) {
-        let key = format!("{}:{}", zone.as_str(), name);
+        let key = format!("{}:{}:{}", zone.as_str(), name, record.record_type);
         self.zone_cache.entry(key).or_default().push(record);
     }
 

@@ -19,6 +19,7 @@ impl PeerIdentity {
 
     pub fn from_gnunet(peer: &gnunet_sys::GNUNET_PeerIdentity) -> Self {
         unsafe {
+            // GNUNET_i2s returns a pointer to a static buffer, no free needed
             let cstr = gnunet_sys::GNUNET_i2s(peer);
             Self(CStr::from_ptr(cstr).to_string_lossy().into_owned())
         }
@@ -115,7 +116,9 @@ impl PublicKey {
     pub fn from_gnunet_eddsa(key: &gnunet_sys::GNUNET_CRYPTO_EddsaPublicKey) -> Self {
         unsafe {
             let cstr = gnunet_sys::GNUNET_CRYPTO_eddsa_public_key_to_string(key);
-            Self(CStr::from_ptr(cstr).to_string_lossy().into_owned())
+            let s = CStr::from_ptr(cstr).to_string_lossy().into_owned();
+            gnunet_sys::GNUNET_xfree_(cstr as *mut libc::c_void, c"crypto.rs".as_ptr(), line!() as libc::c_int);
+            Self(s)
         }
     }
 }
@@ -145,6 +148,7 @@ impl PrivateKey {
         unsafe {
             let cstr = gnunet_sys::GNUNET_CRYPTO_eddsa_private_key_to_string(&key);
             let s = CStr::from_ptr(cstr).to_string_lossy().into_owned();
+            gnunet_sys::GNUNET_xfree_(cstr as *mut libc::c_void, c"crypto.rs".as_ptr(), line!() as libc::c_int);
             gnunet_sys::GNUNET_CRYPTO_eddsa_key_clear(&mut key);
             Self(s)
         }

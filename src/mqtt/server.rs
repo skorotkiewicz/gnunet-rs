@@ -13,6 +13,12 @@ pub struct MqttServer {
     connected_peers: Arc<RwLock<HashMap<String, String>>>,
 }
 
+impl Default for MqttServer {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MqttServer {
     pub fn new() -> Self {
         let store = SocialStore::new();

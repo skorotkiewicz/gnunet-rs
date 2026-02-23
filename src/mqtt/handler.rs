@@ -117,7 +117,7 @@ impl MessageHandler {
         let peer = PeerIdentity::new(req.peer_id);
         let limit = req.limit.unwrap_or(50) as usize;
 
-        let posts: Vec<Post> = self
+        let mut posts: Vec<Post> = self
             .store
             .posts
             .read()
@@ -131,9 +131,11 @@ impl MessageHandler {
                 }
                 false
             })
-            .take(limit)
             .cloned()
             .collect();
+
+        posts.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+        posts.truncate(limit);
 
         ServerMessage::Feed(FeedResponse { posts })
     }
@@ -236,11 +238,13 @@ impl MessageHandler {
         let mut rooms = self.store.rooms.write();
         if let Some(room) = rooms.get_mut(&req.room_id) {
             room.members.retain(|m| m != &peer);
+            drop(rooms);
             ServerMessage::Room(RoomResponse {
                 room: None,
                 rooms: None,
             })
         } else {
+            drop(rooms);
             ServerMessage::Error(ErrorResponse::new(404, "Room not found"))
         }
     }
@@ -379,9 +383,22 @@ impl MessageHandler {
     }
 
     fn handle_search_users(&self, req: SearchUsersRequest) -> ServerMessage {
-        let _limit = req.limit.unwrap_or(20) as usize;
-        let _query = req.query.to_lowercase();
+        let limit = req.limit.unwrap_or(20) as usize;
+        let query = req.query.to_lowercase();
 
-        ServerMessage::User(UserResponse { user: None })
+        let users: Vec<User> = self
+            .store
+            .users
+            .read()
+            .values()
+            .filter(|u| {
+                u.username.to_lowercase().contains(&query)
+                    || u.display_name.to_lowercase().contains(&query)
+            })
+            .take(limit)
+            .cloned()
+            .collect();
+
+        ServerMessage::SearchUsers(SearchUsersResponse { users })
     }
 }
