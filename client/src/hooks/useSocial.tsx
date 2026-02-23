@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
 import { useWebSocket } from './useWebSocket';
 import type { User, Post, ChatRoom, ChatMessage, PrivateMessage, ClientMessage, ServerMessage, EventMessage } from '../types';
 
@@ -23,6 +23,14 @@ interface SocialContextValue {
 }
 
 const SocialContext = createContext<SocialContextValue | null>(null);
+
+function getOrCreatePeerId(): string {
+  const stored = localStorage.getItem('gnunet_peer_id');
+  if (stored) return stored;
+  const id = crypto.randomUUID();
+  localStorage.setItem('gnunet_peer_id', id);
+  return id;
+}
 
 function handleEvent(
   event: EventMessage,
@@ -51,7 +59,12 @@ function handleEvent(
 }
 
 export function SocialProvider({ children }: { children: ReactNode }) {
-  const wsUrl = `ws://${window.location.hostname}:8080/ws/${crypto.randomUUID()}`;
+  const peerIdRef = useRef<string>(getOrCreatePeerId());
+  const wsUrl = useMemo(
+    () => `ws://${window.location.hostname}:8080/ws/${peerIdRef.current}`,
+    []
+  );
+  
   const { connected, send, subscribe } = useWebSocket(wsUrl);
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -60,6 +73,11 @@ export function SocialProvider({ children }: { children: ReactNode }) {
   const [roomMessages, setRoomMessages] = useState<ChatMessage[]>([]);
   const [privateMessages, setPrivateMessages] = useState<PrivateMessage[]>([]);
   const [friends, setFriends] = useState<string[]>([]);
+  const currentRoomRef = useRef(currentRoom);
+  
+  useEffect(() => {
+    currentRoomRef.current = currentRoom;
+  }, [currentRoom]);
 
   useEffect(() => {
     const unsubscribe = subscribe((msg: ServerMessage) => {
@@ -76,8 +94,11 @@ export function SocialProvider({ children }: { children: ReactNode }) {
           setPosts(msg.posts);
           break;
         case 'room':
-          if (msg.room && !rooms.find(r => r.id === msg.room!.id)) {
-            setRooms(prev => [...prev, msg.room!]);
+          if (msg.room) {
+            setRooms(prev => {
+              if (prev.find(r => r.id === msg.room!.id)) return prev;
+              return [...prev, msg.room!];
+            });
           }
           break;
         case 'room_message':
@@ -98,12 +119,12 @@ export function SocialProvider({ children }: { children: ReactNode }) {
           if (msg.friends) setFriends(msg.friends);
           break;
         case 'event':
-          handleEvent(msg.event, currentRoom, setPosts, setRoomMessages, setPrivateMessages, setFriends);
+          handleEvent(msg.event, currentRoomRef.current, setPosts, setRoomMessages, setPrivateMessages, setFriends);
           break;
       }
     });
     return unsubscribe;
-  }, [subscribe, send, rooms, currentRoom]);
+  }, [subscribe, send]);
 
   const login = useCallback((peerId: string) => {
     send({ type: 'auth', peer_id: peerId });
