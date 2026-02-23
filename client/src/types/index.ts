@@ -1,5 +1,5 @@
 export interface User {
-  id: { id: string };
+  id: string;
   username: string;
   display_name: string;
   bio: string | null;
@@ -11,7 +11,7 @@ export interface User {
 
 export interface Post {
   id: string;
-  author_id: { id: string };
+  author_id: string;
   content: string;
   media_hashes: string[];
   reply_to: string | null;
@@ -26,9 +26,9 @@ export interface ChatRoom {
   id: string;
   name: string;
   description: string | null;
-  owner_id: { id: string };
-  admins: { id: string }[];
-  members: { id: string }[];
+  owner_id: string;
+  admins: string[];
+  members: string[];
   is_group: boolean;
   is_public: boolean;
   created_at: string;
@@ -37,7 +37,7 @@ export interface ChatRoom {
 export interface ChatMessage {
   id: string;
   room_id: string;
-  sender_id: { id: string };
+  sender_id: string;
   content: string;
   media_hashes: string[];
   reply_to: string | null;
@@ -46,8 +46,8 @@ export interface ChatMessage {
 
 export interface PrivateMessage {
   id: string;
-  sender_id: { id: string };
-  recipient_id: { id: string };
+  sender_id: string;
+  recipient_id: string;
   content: string;
   media_hashes: string[];
   created_at: string;
@@ -55,8 +55,8 @@ export interface PrivateMessage {
 }
 
 export interface Friendship {
-  requester_id: { id: string };
-  addressee_id: { id: string };
+  requester_id: string;
+  addressee_id: string;
   status: 'Pending' | 'Accepted' | 'Blocked';
   created_at: string;
   updated_at: string;

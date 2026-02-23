@@ -4,6 +4,8 @@ import type { User, Post, ChatRoom, ChatMessage, PrivateMessage, ClientMessage, 
 
 interface SocialContextValue {
   connected: boolean;
+  authenticated: boolean;
+  peerId: string | null;
   user: User | null;
   posts: Post[];
   rooms: ChatRoom[];
@@ -26,7 +28,7 @@ const SocialContext = createContext<SocialContextValue | null>(null);
 
 const PEER_ID_KEY = 'gnunet_peer_id';
 
-function getPeerId(): string | null {
+function getStoredPeerId(): string | null {
   return localStorage.getItem(PEER_ID_KEY);
 }
 
@@ -57,10 +59,11 @@ function handleEvent(
 }
 
 export function SocialProvider({ children }: { children: ReactNode }) {
-  const [peerId] = useState(getPeerId);
-  const wsUrl = `ws://${window.location.hostname}:8080/ws/${peerId}`;
+  const wsUrl = `ws://${window.location.hostname}:8080/ws`;
 
   const { connected, send, subscribe } = useWebSocket(wsUrl);
+  const [authenticated, setAuthenticated] = useState(false);
+  const [peerId, setPeerId] = useState<string | null>(getStoredPeerId);
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
@@ -75,10 +78,17 @@ export function SocialProvider({ children }: { children: ReactNode }) {
   }, [currentRoom]);
 
   useEffect(() => {
+    if (connected && peerId && !authenticated) {
+      send({ type: 'auth', peer_id: peerId });
+    }
+  }, [connected, peerId, authenticated, send]);
+
+  useEffect(() => {
     const unsubscribe = subscribe((msg: ServerMessage) => {
       switch (msg.type) {
         case 'auth':
           if (msg.success) {
+            setAuthenticated(true);
             send({ type: 'get_feed', peer_id: msg.peer_id });
           }
           break;
@@ -123,8 +133,8 @@ export function SocialProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback((newPeerId: string) => {
     localStorage.setItem(PEER_ID_KEY, newPeerId);
-    send({ type: 'auth', peer_id: newPeerId });
-  }, [send]);
+    setPeerId(newPeerId);
+  }, []);
 
   const createPost = useCallback((content: string) => {
     send({
@@ -162,15 +172,17 @@ export function SocialProvider({ children }: { children: ReactNode }) {
   }, [send]);
 
   const getFeed = useCallback(() => {
-    if (user) {
-      send({ type: 'get_feed', peer_id: user.id.id });
+    if (peerId) {
+      send({ type: 'get_feed', peer_id: peerId });
     }
-  }, [send, user]);
+  }, [send, peerId]);
 
   return (
     <SocialContext.Provider
       value={{
         connected,
+        authenticated,
+        peerId,
         user,
         posts,
         rooms,

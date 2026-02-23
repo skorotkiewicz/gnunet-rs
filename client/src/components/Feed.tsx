@@ -35,7 +35,7 @@ export function Feed() {
         {posts.map((post) => (
           <article key={post.id} className="post">
             <header className="post-header">
-              <span className="post-author">@{post.author_id.id.slice(0, 8)}</span>
+              <span className="post-author">@{post.author_id.slice(0, 8)}</span>
               <time className="post-time">
                 {new Date(post.created_at).toLocaleTimeString()}
               </time>

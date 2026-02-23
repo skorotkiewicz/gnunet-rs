@@ -42,7 +42,7 @@ export function Chat() {
       <div className="chat-messages">
         {messages.map((msg) => (
           <div key={msg.id} className="chat-message">
-            <span className="message-author">@{msg.sender_id.id.slice(0, 8)}</span>
+            <span className="message-author">@{msg.sender_id.slice(0, 8)}</span>
             <span className="message-content">{msg.content}</span>
             <time className="message-time">
               {new Date(msg.created_at).toLocaleTimeString()}

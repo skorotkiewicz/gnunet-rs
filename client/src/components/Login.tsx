@@ -1,11 +1,7 @@
 import { useState } from 'react';
 import { useSocial } from '../hooks';
 
-interface LoginProps {
-  onLogin?: () => void;
-}
-
-export function Login({ onLogin }: LoginProps) {
+export function Login() {
   const { login, connected } = useSocial();
   const [peerId, setPeerId] = useState('');
 
@@ -13,7 +9,6 @@ export function Login({ onLogin }: LoginProps) {
     e.preventDefault();
     if (peerId.trim()) {
       login(peerId.trim());
-      onLogin?.();
     }
   };
 
@@ -22,7 +17,7 @@ export function Login({ onLogin }: LoginProps) {
       <div className="login-card">
         <h1>GNUnet Social</h1>
         <p className="login-subtitle">Decentralized social networking</p>
-
+        
         {!connected ? (
           <div className="login-connecting">Connecting to network...</div>
         ) : (
